@@ -4,11 +4,14 @@
   "description": "This is a dev tinder used for learning purpose.",
   "main": "index.js",
   "scripts": {
+    "start":"node src/app.js",
+    "dev":"nodemon src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "nodemon": "^3.1.10"
   }
 }
