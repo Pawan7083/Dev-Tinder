@@ -3,10 +3,14 @@ const {adminAuth}= require("./middleware/getAuth");
 const {ConnectDB} = require("./config/database");
 const {User}= require("./models/User");
 const validator = require("validator");
+const bcrypt= require("bcryptjs");
+const cookieParser= require("cookie-parser");
+
+// require("dotenv").config();
 
 
 const  app= express();
-
+app.use(cookieParser());
 app.use(express.json());
 
 app.use("/admin",adminAuth,(req,res,next)=>{
@@ -29,11 +33,15 @@ app.post("/user",async(req,res,next)=>{
             if(!validator.isEmail(email)) throw new Error("please enter valid email");
             if(!validator.isStrongPassword(password)) throw new Error("Please enter a strong password");
 
+          
+            const hashPassword=await bcrypt.hash(password,10);
+            console.log(hashPassword);
+
         const user=  new User({
             firstName:firstName,
             lastName:lastName,
             email:email,
-            password:password
+            password:hashPassword,
         })
         await user.save().then(()=>{
 
@@ -48,7 +56,31 @@ app.post("/user",async(req,res,next)=>{
     // res.send("This is the 2nd /user request handler.")
     // next();
 })
+
+app.get("/login", async(req,res)=>{
+    
+    try{
+        const {email,password}= req.body;
+        if(!validator.isEmail(email))throw new Error("Please enter valid email");
+
+        const user =await User.findOne({"email":email});
+        if(!user)throw new Error("Invalid credential");
+        
+        const isValidPassword=await bcrypt.compare(password,user.password);
+        if(!isValidPassword)throw new Error("Invalid credential!");
+
+        res.cookie("id",user._id);
+
+        res.status(200).json("Login successfull.");
+    }
+    catch(error){
+        res.status(400).send("ERROR : "+error);
+    }
+})
+
 app.get("/user",(req,res)=>{
+    const cookie= req.cookies;
+    console.log(cookie);
     const {name,id}=req.query;
     res.end("<h1>This is the 3rd /user request handler.<h1>"+name + " "+ id);
 })
