@@ -1,3 +1,6 @@
+const jwt= require("jsonwebtoken");
+const {User}=require("../models/User");
+
 const adminAuth = (req,res,next)=>{
     const token = "abc";
     const isAuthenticate= (token==="abc");
@@ -10,4 +13,20 @@ const adminAuth = (req,res,next)=>{
     }
 }
 
-module.exports= {adminAuth};
+const userAuth = async(req,res,next)=>{
+    try{
+        const {token}= req.cookies;
+        if(!token) throw new Error("Invalid token");
+
+        const decodeToken= jwt.verify(token,"poiuytrewsdfghj;lkjhg");
+        const user=await User.find({"_id":decodeToken.id});
+        if(!user)throw new Error("Invalid token");
+        res.cookie("user",user);
+        next();
+    }
+    catch(error){
+        res.status(400).send("ERROR : "+error);
+    }
+}
+
+module.exports= {adminAuth,userAuth};

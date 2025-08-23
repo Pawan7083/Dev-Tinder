@@ -1,10 +1,11 @@
 const express = require("express");
-const {adminAuth}= require("./middleware/getAuth");
+const {adminAuth,userAuth}= require("./middleware/getAuth");
 const {ConnectDB} = require("./config/database");
 const {User}= require("./models/User");
 const validator = require("validator");
 const bcrypt= require("bcryptjs");
 const cookieParser= require("cookie-parser");
+const jwt= require("jsonwebtoken");
 
 // require("dotenv").config();
 
@@ -19,10 +20,10 @@ app.use("/admin",adminAuth,(req,res,next)=>{
 app.get("/admin/getData",(req,res,next)=>{
     res.send("This is /getData request handler for admin ");
 })
-app.get("/user",(req,res,next)=>{
-    console.log("This is first /user request handler.");
-    next();
-})
+// app.get("/user",(req,res,next)=>{
+//     console.log("This is first /user request handler.");
+//     next();
+// })
 app.post("/user",async(req,res,next)=>{
     try{
             const { firstName, lastName, email,password}=req.body;
@@ -69,7 +70,9 @@ app.get("/login", async(req,res)=>{
         const isValidPassword=await bcrypt.compare(password,user.password);
         if(!isValidPassword)throw new Error("Invalid credential!");
 
-        res.cookie("id",user._id);
+        const token= jwt.sign({id:user._id},"poiuytrewsdfghj;lkjhg",{expiresIn:"1h"});
+
+        res.cookie("token",token);
 
         res.status(200).json("Login successfull.");
     }
@@ -78,7 +81,7 @@ app.get("/login", async(req,res)=>{
     }
 })
 
-app.get("/user",(req,res)=>{
+app.get("/user",userAuth,(req,res)=>{
     const cookie= req.cookies;
     console.log(cookie);
     const {name,id}=req.query;
