@@ -19,13 +19,14 @@ const userAuth = async(req,res,next)=>{
         if(!token) throw new Error("Invalid token");
 
         const decodeToken= jwt.verify(token,"poiuytrewsdfghj;lkjhg");
-        const user=await User.find({"_id":decodeToken.id});
+        const user=await User.findOne({"_id":decodeToken.id});
         if(!user)throw new Error("Invalid token");
         res.cookie("user",user);
+        // res.user("user",user);
         next();
     }
     catch(error){
-        res.status(400).send("ERROR : "+error);
+        res.status(400).send("ERROR : "+error.message);
     }
 }
 
