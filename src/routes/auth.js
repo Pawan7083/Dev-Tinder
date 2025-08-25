@@ -68,4 +68,23 @@ auth.post("/logout", async(req,res)=>{
     res.status(200).send("Logout successfull.");
 })
 
+auth.patch("/forgetpassword",async(req,res)=>{
+    try{
+        const ALLOWED_PARAMETER=["firstName","lastName","email","password"];
+        const isValidParameter= Object.keys(req.body).every((key)=>ALLOWED_PARAMETER.includes(key));
+        if(!isValidParameter) throw new Error("Invalid request parameter");
+        const {firstName,lastName,email,password}= req.body;
+
+        const user = await User.findOne({firstName,lastName,email})
+        if(!user)throw new Error("User not found");
+        user.password= bcrypt.hash(password,10)
+        await User.findByIdAndUpdate(user._id,user,{returnDocument:"after"});
+        console.log(user);
+        res.status(200).send({message:"Password updated successfully!",user:user});
+    }
+    catch(error){
+        res.status(400).send({"Error : ":error});
+    }
+})
+
 module.exports={auth};

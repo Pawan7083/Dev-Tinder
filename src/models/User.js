@@ -4,7 +4,7 @@ const validator= require("validator");
 const UserSchema= new mongoose.Schema({
     firstName : {
         type:String,
-        require: true,
+        required: true,
         trim:true,
         minLength : 4,
         maxLength : 50,
@@ -33,19 +33,16 @@ const UserSchema= new mongoose.Schema({
         }
     },
     gender:{
-        type:String,
-        enum:{
-            values:["male","female","others"],
-            message:"{VALUE} is invalid gender."
-        },
-        // validate(value){
-        //     if(!["male","female", "others"].includes(value))throw new Error("Provide valid gender");
-        // }
+        type: String,
+        enum: {
+            values: ["male", "female","others"],
+            message: '{VALUE} is not invalid'
+        }
     },
     about:{
         type:String,
         default:"This is a software engineer.",
-        maxLength:250
+        maxLength:250,
     },
     skills:{
         type:[String]
