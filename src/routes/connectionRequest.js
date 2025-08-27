@@ -53,15 +53,14 @@ connectionRequest.patch("/review/:status/:toUserId",userAuth,async(req,res)=>{
         if(!validUser)throw new Error("You are sending unverified user");
 
         const connectionRequest= await ConnectionRequest.findOne({
-            fromUserId:toUserId,toUser:user._id, status:"intrested"
+            fromUserId:toUserId,toUserId:user._id,status:"intrested"
         });
 
         if(!connectionRequest)throw new Error("Invalid request");
-        console.log(connectionRequest);
         const updateRequest = await ConnectionRequest.findByIdAndUpdate({_id:connectionRequest._id},{status:status},{returnDocument:"after"});
         res.status(200).json({message:"requested Updated successfully.",data:updateRequest});
     }catch(error){
-        res.status(200).send("ERROR : "+error);
+        res.status(400).send("ERROR : "+error);
     }
 })
 
